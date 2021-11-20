@@ -483,7 +483,7 @@ test('selectively ignore scripts in some dependencies by onlyBuiltDependencies',
 
   const lockfile = await project.readLockfile()
   expect(lockfile.onlyBuiltDependencies).toStrictEqual(onlyBuiltDependencies)
-  expect(lockfile.packages['/pre-and-postinstall-scripts-example/1.0.0'].requiresBuild).toBe(false)
+  expect(lockfile.packages['/pre-and-postinstall-scripts-example/1.0.0'].requiresBuild).toBe(undefined)
   expect(lockfile.packages['/install-script-example/1.0.0'].requiresBuild).toBe(true)
 
   await rimraf('node_modules')
@@ -556,8 +556,8 @@ test('lockfile is updated if onlyBuiltDependencies is changed', async () => {
   {
     const lockfile = await project.readLockfile()
     expect(lockfile.onlyBuiltDependencies).toStrictEqual(onlyBuiltDependencies)
-    expect(lockfile.packages['/pre-and-postinstall-scripts-example/1.0.0'].requiresBuild).toBe(false)
-    expect(lockfile.packages['/install-script-example/1.0.0'].requiresBuild).toBe(false)
+    expect(lockfile.packages['/pre-and-postinstall-scripts-example/1.0.0'].requiresBuild).toBe(undefined)
+    expect(lockfile.packages['/install-script-example/1.0.0'].requiresBuild).toBe(undefined)
   }
 
   onlyBuiltDependencies.push('pre-and-postinstall-scripts-example')
@@ -574,7 +574,7 @@ test('lockfile is updated if onlyBuiltDependencies is changed', async () => {
     const lockfile = await project.readLockfile()
     expect(lockfile.onlyBuiltDependencies).toStrictEqual(onlyBuiltDependencies)
     expect(lockfile.packages['/pre-and-postinstall-scripts-example/1.0.0'].requiresBuild).toBe(true)
-    expect(lockfile.packages['/install-script-example/1.0.0'].requiresBuild).toBe(false)
+    expect(lockfile.packages['/install-script-example/1.0.0'].requiresBuild).toBe(undefined)
   }
 })
 
