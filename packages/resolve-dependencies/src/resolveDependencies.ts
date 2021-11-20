@@ -116,6 +116,7 @@ export interface ChildrenByParentDepPath {
 }
 
 export interface ResolutionContext {
+  allowBuild?: (pkgName: string) => boolean
   updatedSet: Set<string>
   defaultTag: string
   dryRun: boolean
@@ -128,8 +129,6 @@ export interface ResolutionContext {
   currentLockfile: Lockfile
   linkWorkspacePackagesDepth: number
   lockfileDir: string
-  neverBuiltDependencies: Set<string>
-  onlyBuiltDependencies: false | Set<string>
   storeController: StoreController
   // the IDs of packages that are not installable
   skipped: Set<string>
@@ -786,12 +785,11 @@ async function resolveDependency (
     logFetchResult(pkgResponse, ctx.lockfileDir)
 
     ctx.resolvedPackagesByDepPath[depPath] = getResolvedPackage({
+      allowBuild: ctx.allowBuild,
       dependencyLockfile: currentPkg.dependencyLockfile,
       depPath,
       force: ctx.force,
       hasBin,
-      neverBuiltDependencies: ctx.neverBuiltDependencies,
-      onlyBuiltDependencies: ctx.onlyBuiltDependencies,
       pkg,
       pkgResponse,
       prepare,
@@ -864,12 +862,11 @@ function pkgIsLeaf (pkg: PackageManifest) {
 
 function getResolvedPackage (
   options: {
+    allowBuild?: (pkgName: string) => boolean
     dependencyLockfile?: PackageSnapshot
     depPath: string
     force: boolean
     hasBin: boolean
-    neverBuiltDependencies: Set<string>
-    onlyBuiltDependencies: false | Set<string>
     pkg: PackageManifest
     pkgResponse: PackageResponse
     prepare: boolean
@@ -878,19 +875,9 @@ function getResolvedPackage (
 ) {
   const peerDependencies = peerDependenciesWithoutOwn(options.pkg)
 
-  let requiresBuild: boolean | undefined
-  if (options.onlyBuiltDependencies === false || options.onlyBuiltDependencies.has(options.pkg.name)) {
-    // No onlyBuiltDependencies is specified or this package is explicitly allowed.
-    if (options.neverBuiltDependencies.has(options.pkg.name)) {
-      // This package is explicitly listed.
-      requiresBuild = false
-    } else {
-      // default resolution
-      requiresBuild = options.dependencyLockfile != null ? Boolean(options.dependencyLockfile.requiresBuild) : undefined
-    }
-  } else {
-    requiresBuild = false
-  }
+  const requiresBuild = (options.allowBuild == null || options.allowBuild(options.pkg.name))
+    ? ((options.dependencyLockfile != null) ? Boolean(options.dependencyLockfile.requiresBuild) : undefined)
+    : false
 
   return {
     additionalInfo: {

@@ -789,6 +789,14 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
     }), {})
   }
 
+  let allowBuild: undefined | ((pkgName: string) => boolean)
+  if (opts.neverBuiltDependencies != null && opts.neverBuiltDependencies.length > 0) {
+    const neverBuiltDependencies = new Set(opts.neverBuiltDependencies)
+    allowBuild = (pkgName) => !neverBuiltDependencies.has(pkgName)
+  } else if (opts.onlyBuiltDependencies !== false && opts.onlyBuiltDependencies != null) {
+    const onlyBuiltDependencies = new Set(opts.onlyBuiltDependencies)
+    allowBuild = (pkgName) => onlyBuiltDependencies.has(pkgName)
+  }
   let {
     dependenciesGraph,
     dependenciesByProjectId,
@@ -801,6 +809,7 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
   } = await resolveDependencies(
     projectsToResolve,
     {
+      allowBuild,
       currentLockfile: ctx.currentLockfile,
       dryRun: opts.lockfileOnly,
       engineStrict: opts.engineStrict,
@@ -809,8 +818,6 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
       hooks: opts.hooks,
       linkWorkspacePackagesDepth: opts.linkWorkspacePackagesDepth ?? (opts.saveWorkspaceProtocol ? 0 : -1),
       lockfileDir: opts.lockfileDir,
-      neverBuiltDependencies: new Set(opts.neverBuiltDependencies),
-      onlyBuiltDependencies: opts.onlyBuiltDependencies ? new Set(opts.onlyBuiltDependencies) : false,
       nodeVersion: opts.nodeVersion,
       pnpmVersion: opts.packageManager.name === 'pnpm' ? opts.packageManager.version : '',
       preferWorkspacePackages: opts.preferWorkspacePackages,
