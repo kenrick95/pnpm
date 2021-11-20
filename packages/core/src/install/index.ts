@@ -173,9 +173,8 @@ export async function mutateModules (
     ? rootProjectManifest.pnpm?.overrides ?? rootProjectManifest.resolutions
     : undefined
   const neverBuiltDependencies = rootProjectManifest?.pnpm?.neverBuiltDependencies ?? []
-  // internally we use false to indicate this lockfile does not have a onlyBuiltDependencies key. If it is an empty array, it means no packages is allowed to be built.
-  const onlyBuiltDependencies = rootProjectManifest?.pnpm?.onlyBuiltDependencies ?? false
-  if (onlyBuiltDependencies && rootProjectManifest?.pnpm?.neverBuiltDependencies) {
+  const onlyBuiltDependencies = rootProjectManifest?.pnpm?.onlyBuiltDependencies
+  if (onlyBuiltDependencies != null && rootProjectManifest?.pnpm?.neverBuiltDependencies != null) {
     throw new PnpmError('CONFIG_CONFLICT_BUILT_DEPENDENCIES', 'Cannot have both neverBuiltDependencies and onlyBuiltDependencies in the package.json')
   }
   const packageExtensions = rootProjectManifest?.pnpm?.packageExtensions
@@ -234,17 +233,13 @@ export async function mutateModules (
     let needsFullResolution = !maybeOpts.ignorePackageManifest && (
       !equals(ctx.wantedLockfile.overrides ?? {}, overrides ?? {}) ||
       !equals((ctx.wantedLockfile.neverBuiltDependencies ?? []).sort(), (neverBuiltDependencies ?? []).sort()) ||
-      (
-        onlyBuiltDependencies === false
-          ? ctx.wantedLockfile.onlyBuiltDependencies !== undefined
-          : !equals(onlyBuiltDependencies.sort(), ctx.wantedLockfile.onlyBuiltDependencies)
-      ) ||
+      !equals(onlyBuiltDependencies?.sort(), ctx.wantedLockfile.onlyBuiltDependencies) ||
       ctx.wantedLockfile.packageExtensionsChecksum !== packageExtensionsChecksum) ||
       opts.fixLockfile
     if (needsFullResolution) {
       ctx.wantedLockfile.overrides = overrides
       ctx.wantedLockfile.neverBuiltDependencies = neverBuiltDependencies
-      ctx.wantedLockfile.onlyBuiltDependencies = onlyBuiltDependencies || undefined
+      ctx.wantedLockfile.onlyBuiltDependencies = onlyBuiltDependencies
       ctx.wantedLockfile.packageExtensionsChecksum = packageExtensionsChecksum
     }
     const frozenLockfile = opts.frozenLockfile ||
@@ -696,7 +691,7 @@ type InstallFunction = (
     makePartialCurrentLockfile: boolean
     needsFullResolution: boolean
     neverBuiltDependencies: string[]
-    onlyBuiltDependencies: false | string[]
+    onlyBuiltDependencies?: string[]
     overrides?: Record<string, string>
     updateLockfileMinorVersion: boolean
     preferredVersions?: PreferredVersions
@@ -793,7 +788,7 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
   if (opts.neverBuiltDependencies != null && opts.neverBuiltDependencies.length > 0) {
     const neverBuiltDependencies = new Set(opts.neverBuiltDependencies)
     allowBuild = (pkgName) => !neverBuiltDependencies.has(pkgName)
-  } else if (opts.onlyBuiltDependencies !== false && opts.onlyBuiltDependencies != null) {
+  } else if (opts.onlyBuiltDependencies != null) {
     const onlyBuiltDependencies = new Set(opts.onlyBuiltDependencies)
     allowBuild = (pkgName) => onlyBuiltDependencies.has(pkgName)
   }
