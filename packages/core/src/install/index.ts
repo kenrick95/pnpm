@@ -172,9 +172,9 @@ export async function mutateModules (
   const overrides = (rootProjectManifest != null)
     ? rootProjectManifest.pnpm?.overrides ?? rootProjectManifest.resolutions
     : undefined
-  const neverBuiltDependencies = rootProjectManifest?.pnpm?.neverBuiltDependencies ?? []
+  const neverBuiltDependencies = rootProjectManifest?.pnpm?.neverBuiltDependencies
   const onlyBuiltDependencies = rootProjectManifest?.pnpm?.onlyBuiltDependencies
-  if (onlyBuiltDependencies != null && rootProjectManifest?.pnpm?.neverBuiltDependencies != null) {
+  if (onlyBuiltDependencies != null && neverBuiltDependencies != null) {
     throw new PnpmError('CONFIG_CONFLICT_BUILT_DEPENDENCIES', 'Cannot have both neverBuiltDependencies and onlyBuiltDependencies in the package.json')
   }
   const packageExtensions = rootProjectManifest?.pnpm?.packageExtensions
@@ -230,11 +230,13 @@ export async function mutateModules (
       )
     }
     const packageExtensionsChecksum = isEmpty(packageExtensions ?? {}) ? undefined : createObjectChecksum(packageExtensions!)
-    let needsFullResolution = !maybeOpts.ignorePackageManifest && (
-      !equals(ctx.wantedLockfile.overrides ?? {}, overrides ?? {}) ||
-      !equals((ctx.wantedLockfile.neverBuiltDependencies ?? []).sort(), (neverBuiltDependencies ?? []).sort()) ||
-      !equals(onlyBuiltDependencies?.sort(), ctx.wantedLockfile.onlyBuiltDependencies) ||
-      ctx.wantedLockfile.packageExtensionsChecksum !== packageExtensionsChecksum) ||
+    let needsFullResolution = !maybeOpts.ignorePackageManifest &&
+      lockfileIsUpToDate(ctx.wantedLockfile, {
+        overrides,
+        neverBuiltDependencies,
+        onlyBuiltDependencies,
+        packageExtensionsChecksum,
+      }) ||
       opts.fixLockfile
     if (needsFullResolution) {
       ctx.wantedLockfile.overrides = overrides
@@ -525,6 +527,25 @@ export async function mutateModules (
   }
 }
 
+function lockfileIsUpToDate (
+  lockfile: Lockfile,
+  {
+    neverBuiltDependencies,
+    onlyBuiltDependencies,
+    overrides,
+    packageExtensionsChecksum,
+  }: {
+    neverBuiltDependencies?: string[]
+    onlyBuiltDependencies?: string[]
+    overrides?: Record<string, string>
+    packageExtensionsChecksum?: string
+  }) {
+  return !equals(lockfile.overrides ?? {}, overrides ?? {}) ||
+    !equals((lockfile.neverBuiltDependencies ?? []).sort(), (neverBuiltDependencies ?? []).sort()) ||
+    !equals(onlyBuiltDependencies?.sort(), lockfile.onlyBuiltDependencies) ||
+    lockfile.packageExtensionsChecksum !== packageExtensionsChecksum
+}
+
 export function createObjectChecksum (obj: Object) {
   const s = JSON.stringify(obj)
   return crypto.createHash('md5').update(s).digest('hex')
@@ -690,7 +711,7 @@ type InstallFunction = (
   opts: StrictInstallOptions & {
     makePartialCurrentLockfile: boolean
     needsFullResolution: boolean
-    neverBuiltDependencies: string[]
+    neverBuiltDependencies?: string[]
     onlyBuiltDependencies?: string[]
     overrides?: Record<string, string>
     updateLockfileMinorVersion: boolean
@@ -784,14 +805,6 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
     }), {})
   }
 
-  let allowBuild: undefined | ((pkgName: string) => boolean)
-  if (opts.neverBuiltDependencies != null && opts.neverBuiltDependencies.length > 0) {
-    const neverBuiltDependencies = new Set(opts.neverBuiltDependencies)
-    allowBuild = (pkgName) => !neverBuiltDependencies.has(pkgName)
-  } else if (opts.onlyBuiltDependencies != null) {
-    const onlyBuiltDependencies = new Set(opts.onlyBuiltDependencies)
-    allowBuild = (pkgName) => onlyBuiltDependencies.has(pkgName)
-  }
   let {
     dependenciesGraph,
     dependenciesByProjectId,
@@ -804,7 +817,7 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
   } = await resolveDependencies(
     projectsToResolve,
     {
-      allowBuild,
+      allowBuild: createAllowBuildFunction(opts),
       currentLockfile: ctx.currentLockfile,
       dryRun: opts.lockfileOnly,
       engineStrict: opts.engineStrict,
@@ -1046,6 +1059,22 @@ const _installInContext: InstallFunction = async (projects, ctx, opts) => {
     newLockfile,
     projects: projectsToResolve.map(({ manifest, rootDir }) => ({ rootDir, manifest })),
   }
+}
+
+function createAllowBuildFunction (
+  opts: {
+    neverBuiltDependencies?: string[]
+    onlyBuiltDependencies?: string[]
+  }
+): undefined | ((pkgName: string) => boolean) {
+  if (opts.neverBuiltDependencies != null && opts.neverBuiltDependencies.length > 0) {
+    const neverBuiltDependencies = new Set(opts.neverBuiltDependencies)
+    return (pkgName) => !neverBuiltDependencies.has(pkgName)
+  } else if (opts.onlyBuiltDependencies != null) {
+    const onlyBuiltDependencies = new Set(opts.onlyBuiltDependencies)
+    return (pkgName) => onlyBuiltDependencies.has(pkgName)
+  }
+  return undefined
 }
 
 const installInContext: InstallFunction = async (projects, ctx, opts) => {

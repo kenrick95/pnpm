@@ -469,7 +469,7 @@ test('selectively ignore scripts in some dependencies by neverBuiltDependencies'
   expect(await exists('node_modules/install-script-example/generated-by-install.js')).toBeTruthy()
 })
 
-test('selectively ignore scripts in some dependencies by onlyBuiltDependencies', async () => {
+test('selectively allow scripts in some dependencies by onlyBuiltDependencies', async () => {
   const project = prepareEmpty()
   const onlyBuiltDependencies = ['install-script-example']
   const manifest = await addDependenciesToPackage({ pnpm: { onlyBuiltDependencies } },
