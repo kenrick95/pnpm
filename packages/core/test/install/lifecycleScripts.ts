@@ -469,6 +469,18 @@ test('selectively ignore scripts in some dependencies by neverBuiltDependencies'
   expect(await exists('node_modules/install-script-example/generated-by-install.js')).toBeTruthy()
 })
 
+test('throw an exception when both neverBuiltDependencies and onlyBuiltDependencies are used', async () => {
+  prepareEmpty()
+
+  await expect(
+    addDependenciesToPackage(
+      { pnpm: { onlyBuiltDependencies: ['foo'], neverBuiltDependencies: ['bar'] } },
+      ['pre-and-postinstall-scripts-example'],
+      await testDefaults()
+    )
+  ).rejects.toThrow(/Cannot have both/)
+})
+
 test('selectively allow scripts in some dependencies by onlyBuiltDependencies', async () => {
   const project = prepareEmpty()
   const onlyBuiltDependencies = ['install-script-example']
