@@ -570,9 +570,6 @@ catalogs:
     sinon:
       specifier: ^16.1.3
       version: 16.1.3
-    sort-keys:
-      specifier: ^4.2.0
-      version: 4.2.0
     split-cmd:
       specifier: ^1.1.0
       version: 1.1.0
@@ -659,6 +656,7 @@ overrides:
   verdaccio: 5.20.1
   yaml@<2.2.2: '>=2.2.2'
   semver@<7.5.2: ^7.6.2
+  sort-keys: ^5.1.0
   tough-cookie@<4.1.3: '>=4.1.3'
   '@yarnpkg/fslib@2': '3'
   socks@2: ^2.8.1
@@ -1531,8 +1529,8 @@ importers:
         specifier: 'catalog:'
         version: 1.0.3
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
       write-ini-file:
         specifier: 'catalog:'
         version: 4.0.1
@@ -2931,8 +2929,8 @@ importers:
         specifier: 'catalog:'
         version: 7.6.2
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
       strip-bom:
         specifier: 'catalog:'
         version: 4.0.0
@@ -3423,8 +3421,8 @@ importers:
         specifier: workspace:*
         version: link:../types
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
     devDependencies:
       '@pnpm/calc-dep-state':
         specifier: workspace:*
@@ -4101,8 +4099,8 @@ importers:
         specifier: 'catalog:'
         version: 7.6.2
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
     devDependencies:
       '@pnpm/assert-project':
         specifier: workspace:*
@@ -5391,8 +5389,8 @@ importers:
         specifier: 'catalog:'
         version: 2.1.0
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
       strip-bom:
         specifier: 'catalog:'
         version: 4.0.0
@@ -7114,8 +7112,8 @@ importers:
         specifier: 'catalog:'
         version: 1.0.3
       sort-keys:
-        specifier: 'catalog:'
-        version: 4.2.0
+        specifier: ^5.1.0
+        version: 5.1.0
     devDependencies:
       '@pnpm/plugin-commands-store-inspecting':
         specifier: workspace:*
@@ -11391,7 +11389,7 @@ packages:
     engines: {node: '>=8'}
 
   is-plain-obj@1.1.0:
-    resolution: {integrity: sha512-yvkRyxmFKEOQ4pNXCmJG5AEQNlXJS5LaONXo5/cLdTZdWvsZ1ioJEonLGAosKlMWE8lwUy/bJzMjcw8az73+Fg==}
+    resolution: {integrity: sha1-caUMhCnfync8kqOQpKA7OfzVHT4=}
     engines: {node: '>=0.10.0'}
 
   is-plain-obj@2.1.0:
@@ -13253,16 +13251,8 @@ packages:
   sonic-boom@1.4.1:
     resolution: {integrity: sha512-LRHh/A8tpW7ru89lrlkU4AszXt1dbwSjVWguGrmlxE7tawVmDBlI1PILMkXAxJTwqhgsEeTHzj36D5CmHgQmNg==}
 
-  sort-keys@2.0.0:
-    resolution: {integrity: sha512-/dPCrG1s3ePpWm6yBbxZq5Be1dXGLyLn9Z791chDC3NFrpkVbWGzkBwPN1knaciexFXgRJ7hzdnwZ4stHSDmjg==}
-    engines: {node: '>=4'}
-
-  sort-keys@4.2.0:
-    resolution: {integrity: sha512-aUYIEU/UviqPgc8mHR6IW1EGxkAXpeRETYcrzg8cLAvUPZcpAlleSXHV2mY7G12GphSH6Gzv+4MMVSSkbdteHg==}
-    engines: {node: '>=8'}
-
-  sort-keys@5.0.0:
-    resolution: {integrity: sha512-Pdz01AvCAottHTPQGzndktFNdbRA75BgOfeT1hH+AMnJFv8lynkPi42rfeEhpx1saTEI3YNMWxfqu0sFD1G8pw==}
+  sort-keys@5.1.0:
+    resolution: {integrity: sha512-aSbHV0DaBcr7u0PVHXzM6NbZNAtrr9sF6+Qfs9UUVG7Ll3jQ6hHi8F/xqIIcn2rvIVbr0v/2zyjSdwSV47AgLQ==}
     engines: {node: '>=12'}
 
   source-map-support@0.5.13:
@@ -15684,7 +15674,7 @@ snapshots:
       lodash.clonedeep: 4.5.0
       parse-json: 5.2.0
       read-yaml-file: 2.1.0
-      sort-keys: 4.2.0
+      sort-keys: 5.1.0
       strip-bom: 4.0.0
 
   '@pnpm/registry-mock@3.40.0(encoding@0.1.13)(typanion@3.14.0)':
@@ -20954,15 +20944,7 @@ snapshots:
       atomic-sleep: 1.0.0
       flatstr: 1.0.12
 
-  sort-keys@2.0.0:
-    dependencies:
-      is-plain-obj: 1.1.0
-
-  sort-keys@4.2.0:
-    dependencies:
-      is-plain-obj: 2.1.0
-
-  sort-keys@5.0.0:
+  sort-keys@5.1.0:
     dependencies:
       is-plain-obj: 4.1.0
 
@@ -21892,7 +21874,7 @@ snapshots:
       graceful-fs: 4.2.11(patch_hash=ivtm2a2cfr5pomcfbedhmr5v2q)
       make-dir: 2.1.0
       pify: 4.0.1
-      sort-keys: 2.0.0
+      sort-keys: 5.1.0
       write-file-atomic: 2.4.3
 
   write-json-file@4.3.0:
@@ -21901,25 +21883,25 @@ snapshots:
       graceful-fs: 4.2.11(patch_hash=ivtm2a2cfr5pomcfbedhmr5v2q)
       is-plain-obj: 2.1.0
       make-dir: 3.1.0
-      sort-keys: 4.2.0
+      sort-keys: 5.1.0
       write-file-atomic: 3.0.3
 
   write-json-file@5.0.0:
     dependencies:
       detect-indent: 7.0.1
       is-plain-obj: 4.1.0
-      sort-keys: 5.0.0
+      sort-keys: 5.1.0
       write-file-atomic: 3.0.3
 
   write-json5-file@3.1.0:
     dependencies:
       json5: 2.2.3
-      sort-keys: 4.2.0
+      sort-keys: 5.1.0
       write-file-atomic: 3.0.3
 
   write-pkg@4.0.0:
     dependencies:
-      sort-keys: 2.0.0
+      sort-keys: 5.1.0
       type-fest: 0.4.1
       write-json-file: 3.2.0
 
